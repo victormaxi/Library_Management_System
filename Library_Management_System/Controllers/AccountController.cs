@@ -6,6 +6,7 @@ using Library_Management_System.Core.Interfaces;
 using Library_Management_System.Core.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Library_Management_System.Controllers
 {
@@ -14,9 +15,11 @@ namespace Library_Management_System.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountServices _accountServices;
-        public AccountController(IAccountServices accountServices)
+        private IConfiguration _configuration;
+        public AccountController(IAccountServices accountServices, IConfiguration configuration)
         {
             _accountServices = accountServices;
+            _configuration = configuration;
         }
         [HttpPost]
         [Route("loginUserAsync")]
@@ -65,6 +68,50 @@ namespace Library_Management_System.Controllers
                 }
             }
             catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrWhiteSpace(token))
+                    return NotFound();
+
+                var result = await _accountServices.ConfirmEmailAsync(userId,token);
+
+                if(result.IsSuccess)
+                {
+                    return Redirect($"{_configuration["AppUrl"]}/ConfirmEmail.html");
+                }
+                return BadRequest(result);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<IActionResult> RestPasswordAsync (string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                    return NotFound();
+
+                var result = await _accountServices.ForgotPasswordAsync(email);
+                if (result.IsSuccess)
+                    return Ok(result);//200
+
+                return BadRequest(result); //400
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }

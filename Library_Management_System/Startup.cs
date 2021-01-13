@@ -35,6 +35,11 @@ namespace Library_Management_System
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            var emailConfig = Configuration
+                .GetSection("EmailConfiguration")
+                .Get<EmailConfiguration>();
+            services.AddSingleton(emailConfig);
             services.AddControllers();
             services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentityCore<ApplicationUser>(options =>
@@ -42,12 +47,14 @@ namespace Library_Management_System
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequiredLength = 5;
+                options.SignIn.RequireConfirmedEmail = true;
 
             })
                .AddEntityFrameworkStores<ApplicationDBContext>()
                .AddDefaultTokenProviders();
             services.AddScoped<IBookServices, BookServicesManager>();
             services.AddScoped<IAccountServices, AccountServicesManager>();
+            services.AddTransient<IMailServices, MailServicesManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 { });
@@ -69,6 +76,7 @@ namespace Library_Management_System
                     ValidateIssuerSigningKey = true
                 };
             });
+            services.Configure<EmailConfiguration>(Configuration.GetSection("SMPT"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,6 +88,8 @@ namespace Library_Management_System
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
 
             app.UseRouting();
 

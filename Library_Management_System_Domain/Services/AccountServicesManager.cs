@@ -230,26 +230,32 @@ namespace Library_Management_System.Domain.Services
                     // var confirmationLink = Url.Action("ConfirmEmail", "Email", new { token, email = user.Email }, Request.Scheme);
                     var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
                     var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
-                    //string url = $"{_configuration["AppUrl"]}/api/account/confirmmailasync?userid={user.Id}&token={validEmailToken}";
+                   // var url = $"{_configuration["AppUrl"]}/api/account/confirmmailasync?userid={user.Id}&token={validEmailToken}" ;
                   //  string link = "Confirm your account Welcome to Library management system" + $"<p>Please confirm your email by <a href='{url}'>clicking here</a></p>";
                     //await _mailServices.SendMail(user.Email, "Confirm your account", $"<h1>Welcome to Library management system</h1>" + $"<p>Please confirm your email by <a href='{url}'>clicking here</a></p>");
 
 
                    // string code = HttpUtility.UrlEncode(await userManager.GenerateEmailConfirmationTokenAsync(userEmail));
 
-                    var callbackUrl = $"{_configuration["AppUrl"]}/api/account/confirmmailasync?userid={user.Id}&code={validEmailToken}";
+                    var callbackUrl = $"{_configuration["AppUrl"]}/api/account/ConfirmEmail?userid={user.Id}&token={validEmailToken}";
                    // var body = Util.PrepareRegistrationEmailTemplate(user, callbackUrl);
-                     var body = ""+(user, callbackUrl);
+                   //  var body = ""+(user, callbackUrl);
 
-                    var subject = "Email Confirmation";
+                   // var subject = "Email Confirmation";
 
                     //_logger.LogInformation($"Sending registration email to {user.Email} ");
 
-                    await _mailServices.SendMail2(user.Email, subject, body, _configuration.GetEmailConfig());
+                    // await _mailServices.Send(user.Email, subject, body);
+               //     _mailServices.Send(
+               //to: user.Email,
+               //subject: "Sign-up Verification API - Verify Email",
+               //html: $@"<h4>Verify Email</h4>
+               //          <p>Thanks for registering!</p>
+               //          {callbackUrl}");
 
-                    //_mailServices.SendEmail(user.Email, url);
+                    _mailServices.SendEmail2(user.Email, $"<a href='{callbackUrl}'> Click here</a>");
                     //EmailHelper emailHelper = new EmailHelper();
-                    //bool emailResponse = emailHelper.SendEmail(user.Email, url);
+                    //bool emailResponse = emailHelper.SendEmail(user.Email, callbackUrl);
 
 
                     // var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);

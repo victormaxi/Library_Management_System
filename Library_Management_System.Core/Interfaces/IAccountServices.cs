@@ -12,5 +12,8 @@ namespace Library_Management_System.Core.Interfaces
         Task<UserManagerResponse> IsExist(string userName);
         Task <UserManagerResponse> RegisterAccountAsync(ApplicationUserVM userVM);
         Task<UserManagerResponse> LoginUser(LoginVM loginVM);
+        Task<UserManagerResponse> ConfirmEmailAsync(string userId, string token);
+        Task<UserManagerResponse> ForgotPasswordAsync(string email);
+        Task SendConfirmRegistrationMail(string userEmail, string WebUrl);
     }
 }
