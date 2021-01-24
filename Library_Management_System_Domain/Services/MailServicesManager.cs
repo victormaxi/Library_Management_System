@@ -71,14 +71,29 @@ namespace Library_Management_System.Domain.Services
             mailMessage.To.Add(MailboxAddress.Parse(userEmail));
 
             mailMessage.Subject = "Confirm your email account";
-           // mailMessage.IsBodyHtml = true;
-            mailMessage.Body = new TextPart(TextFormat.Html) { Text = url} ;
+            // mailMessage.IsBodyHtml = true;
+            mailMessage.Body = new TextPart(TextFormat.Html) { Text = url };
 
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
             smtp.Connect(_emailConfiguration.SmtpHost, _emailConfiguration.SmtpPort, SecureSocketOptions.StartTls);
             smtp.Authenticate(_emailConfiguration.SmtpUser, _emailConfiguration.SmtpPass);
             smtp.Send(mailMessage);
             smtp.Disconnect(true);
+
+            //var mailMessage = new MimeMessage();
+            //mailMessage.From.Add(MailboxAddress.Parse("maximillianonu@gmail.com"));
+            //mailMessage.To.Add(MailboxAddress.Parse(userEmail));
+
+            //mailMessage.Subject = "Confirm your email account";
+            //// mailMessage.IsBodyHtml = true;
+            //mailMessage.Body = new TextPart(TextFormat.Html) { Text = url };
+
+            //using var smtp = new MailKit.Net.Smtp.SmtpClient();
+            //smtp.Connect(_emailConfiguration.SmtpHost, _emailConfiguration.SmtpPort, SecureSocketOptions.StartTls);
+            //smtp.Authenticate(_emailConfiguration.SmtpUser, _emailConfiguration.SmtpPass);
+            //smtp.Send(mailMessage);
+            //smtp.Disconnect(true);
+
 
             //SmtpClient client = new SmtpClient();
             ////client.Credentials = new System.Net.NetworkCredential("sophie.kuhic89@ethereal.email", "2AaG8bbGjHzfKjvB7r");

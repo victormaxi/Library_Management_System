@@ -36,11 +36,20 @@ namespace Library_Management_System
         public void ConfigureServices(IServiceCollection services)
         {
 
+            //var emailConfig = Configuration
+            //    .GetSection("EmailConfiguration")
+            //    .Get<EmailConfiguration>();
             var emailConfig = Configuration
                 .GetSection("EmailConfiguration")
                 .Get<EmailConfiguration>();
             services.AddSingleton(emailConfig);
-            services.AddControllers();
+            //services.AddControllers();
+
+            services.AddControllers(setupAction =>
+            {
+                setupAction.ReturnHttpNotAcceptable = true;
+
+            }).AddXmlDataContractSerializerFormatters();
             services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentityCore<ApplicationUser>(options =>
             {
@@ -76,7 +85,8 @@ namespace Library_Management_System
                     ValidateIssuerSigningKey = true
                 };
             });
-            services.Configure<EmailConfiguration>(Configuration.GetSection("SMPT"));
+           // services.Configure<EmailConfiguration>(Configuration.GetSection("SMPT"));
+            services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,6 +103,7 @@ namespace Library_Management_System
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -73,8 +73,8 @@ namespace Library_Management_System.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("ConfirmEmail")]
+       [HttpGet]
+       [Route("ConfirmEmail/{userId}/{token}")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             try

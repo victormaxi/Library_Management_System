@@ -215,71 +215,116 @@ namespace Library_Management_System.Domain.Services
                         IsSuccess = false
                     };
                 }
-                var user = new ApplicationUser()
+                var isFirstAccount = context.Users.Count() == 0;
+                if (isFirstAccount == true)
                 {
-                    UserName = userVM.UserName,
-                    PhoneNumber = userVM.PhoneNumber,
-                    Email = userVM.Email,
+                    var user = new ApplicationUser()
+                    {
+                        UserName = userVM.UserName,
+                        PhoneNumber = userVM.PhoneNumber,
+                        Email = userVM.Email,
 
-                };
-                var result = await userManager.CreateAsync(user, userVM.Password);
-                if (result.Succeeded)
-                {
+                        // first registered account is an admin
+                        // Role = isFirstAccount ? Roles.Admin : Roles.Student
+                        Role = Roles.Admin
+                    };
 
-                    var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    // var confirmationLink = Url.Action("ConfirmEmail", "Email", new { token, email = user.Email }, Request.Scheme);
-                    var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
-                    var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
-                   // var url = $"{_configuration["AppUrl"]}/api/account/confirmmailasync?userid={user.Id}&token={validEmailToken}" ;
-                  //  string link = "Confirm your account Welcome to Library management system" + $"<p>Please confirm your email by <a href='{url}'>clicking here</a></p>";
-                    //await _mailServices.SendMail(user.Email, "Confirm your account", $"<h1>Welcome to Library management system</h1>" + $"<p>Please confirm your email by <a href='{url}'>clicking here</a></p>");
+                    var result1 = await userManager.CreateAsync(user, userVM.Password);
+                    if (result1.Succeeded)
+                    {
 
+                        var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                   // string code = HttpUtility.UrlEncode(await userManager.GenerateEmailConfirmationTokenAsync(userEmail));
+                        var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+                        var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+                        var callbackUrl = $"{_configuration["WebUrl"]}/account/ConfirmEmail?userid={user.Id}&token={validEmailToken}";
 
-                    var callbackUrl = $"{_configuration["AppUrl"]}/api/account/ConfirmEmail?userid={user.Id}&token={validEmailToken}";
-                   // var body = Util.PrepareRegistrationEmailTemplate(user, callbackUrl);
-                   //  var body = ""+(user, callbackUrl);
+                        _mailServices.SendEmail2(user.Email, $"<a href='{callbackUrl}'> Click here</a>");
 
-                   // var subject = "Email Confirmation";
-
-                    //_logger.LogInformation($"Sending registration email to {user.Email} ");
-
-                    // await _mailServices.Send(user.Email, subject, body);
-               //     _mailServices.Send(
-               //to: user.Email,
-               //subject: "Sign-up Verification API - Verify Email",
-               //html: $@"<h4>Verify Email</h4>
-               //          <p>Thanks for registering!</p>
-               //          {callbackUrl}");
-
-                    _mailServices.SendEmail2(user.Email, $"<a href='{callbackUrl}'> Click here</a>");
-                    //EmailHelper emailHelper = new EmailHelper();
-                    //bool emailResponse = emailHelper.SendEmail(user.Email, callbackUrl);
-
-
-                    // var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    // var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
-                    //var validEmaillToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
-
-                    //string url = $"{_configuration["AppUrl"]}/api/account/confirmrmail?userid={user.Id}&token={validEmaillToken}";
-
-                    //await _mailServices.SendEmailAsync(user.Email, "Confirm your account", $"<h1>Welcome to Library management system</h1>" + $"<p>Please confirm your email by <a href='{url}'>clicking here</a></p>");
+                        return new UserManagerResponse
+                        {
+                            Message = "User created successfully!!",
+                            IsSuccess = true
+                        };
+                    }
 
                     return new UserManagerResponse
                     {
-                        Message = "User created successfully!!",
-                        IsSuccess = true
+                        Message = "User not created",
+                        IsSuccess = false,
+                        Errors = result1.Errors.Select(e => e.Description)
                     };
                 }
 
-
-                return new UserManagerResponse
+                else
                 {
-                    Message = "User not created",
-                    IsSuccess = false,
-                    Errors = result.Errors.Select(e => e.Description)
-                };
+                    var user2 = new ApplicationUser()
+                    {
+                        UserName = userVM.UserName,
+                        PhoneNumber = userVM.PhoneNumber,
+                        Email = userVM.Email,
+
+                        // first registered account is an admin
+                        // Role = isFirstAccount ? Roles.Admin : Roles.Student
+                        Role = Roles.Student
+                    };
+                    var result2 = await userManager.CreateAsync(user2, userVM.Password);
+                    if (result2.Succeeded)
+                    {
+
+                        var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user2);
+
+                        var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+                        var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+                        var callbackUrl = $"{_configuration["WebUrl"]}/account/ConfirmEmail?userid={user2.Id}&token={validEmailToken}";
+
+                        _mailServices.SendEmail2(user2.Email, $"<a href='{callbackUrl}'> Click here</a>");
+
+                        return new UserManagerResponse
+                        {
+                            Message = "User created successfully!!",
+                            IsSuccess = true
+                        };
+                    }
+
+                    return new UserManagerResponse
+                    {
+                        Message = "User not created",
+                        IsSuccess = false,
+                        Errors = result2.Errors.Select(e => e.Description)
+                    };
+
+                }
+                
+                //var result = await userManager.CreateAsync(user, userVM.Password);
+                //if (result.Succeeded)
+                //{
+
+                //    var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                   
+                //    var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+                //    var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+                  
+
+                //    var callbackUrl = $"{_configuration["AppUrl"]}/api/account/ConfirmEmail?userid={user.Id}&token={validEmailToken}";
+                 
+                //    _mailServices.SendEmail2(user.Email, $"<a href='{callbackUrl}'> Click here</a>");
+                   
+
+                //    return new UserManagerResponse
+                //    {
+                //        Message = "User created successfully!!",
+                //        IsSuccess = true
+                //    };
+                //}
+
+
+                //return new UserManagerResponse
+                //{
+                //    Message = "User not created",
+                //    IsSuccess = false,
+                //    Errors = result1.Errors.Select(e => e.Description)
+                //};
             }
             catch (Exception ex)
             {
