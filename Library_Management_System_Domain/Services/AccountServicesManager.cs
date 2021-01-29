@@ -138,7 +138,8 @@ namespace Library_Management_System.Domain.Services
                 
                 return new UserManagerResponse()
                 {
-                    Message = ""
+                    Message = "User doesn't exist",
+                    IsSuccess = true
                 };
             }
             catch(Exception ex)
@@ -150,8 +151,8 @@ namespace Library_Management_System.Domain.Services
         {
             try
             {
-                var userExist = await userManager.FindByNameAsync(loginVM.UserName);
-                if(userExist == null)
+                var user = await userManager.FindByNameAsync(loginVM.UserName);
+                if(user == null)
                 {
                     return new UserManagerResponse
                     {
@@ -159,8 +160,8 @@ namespace Library_Management_System.Domain.Services
                         IsSuccess = false
                     };
                 }
-                var result = await userManager.CheckPasswordAsync(userExist, loginVM.Password);
-                if(!result)
+                var result = await userManager.CheckPasswordAsync(user, loginVM.Password);
+                if(result == false)
                 {
                     return new UserManagerResponse
                     {
@@ -171,7 +172,7 @@ namespace Library_Management_System.Domain.Services
                 var claims = new[]
                 {
                     new Claim ("UserName",loginVM.UserName),
-                    new Claim(ClaimTypes.NameIdentifier,userExist.Id)
+                    new Claim(ClaimTypes.NameIdentifier,user.Id)
                 };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AuthSettings:key"]));

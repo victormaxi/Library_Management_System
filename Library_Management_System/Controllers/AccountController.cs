@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Library_Management_System.Core.Interfaces;
 using Library_Management_System.Core.ViewModels;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -16,10 +18,13 @@ namespace Library_Management_System.Controllers
     {
         private readonly IAccountServices _accountServices;
         private IConfiguration _configuration;
-        public AccountController(IAccountServices accountServices, IConfiguration configuration)
+        private readonly IHttpContextAccessor _accessor;
+
+        public AccountController(IAccountServices accountServices, IConfiguration configuration, IHttpContextAccessor accessor)
         {
             _accountServices = accountServices;
             _configuration = configuration;
+           _accessor = accessor;
         }
         [HttpPost]
         [Route("loginUserAsync")]
@@ -27,8 +32,8 @@ namespace Library_Management_System.Controllers
         {
             try
             {
-                var exist = await _accountServices.IsExist(loginVm.UserName);
-                if(exist!= null)
+                //var exist = await _accountServices.IsExist(loginVm.UserName);
+                if(ModelState.IsValid)
                 {
                     var result = await _accountServices.LoginUser(loginVm);
                     if(result.IsSuccess)
@@ -73,20 +78,23 @@ namespace Library_Management_System.Controllers
             }
         }
 
-       [HttpGet]
-       [Route("ConfirmEmail/{userId}/{token}")]
-        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+
+        [HttpGet("confirmEmail/{userId}/{token}")] 
+        public async Task<IActionResult> ConfirmEmail(string userId, string token )
         {
             try
             {
+                var role = _accessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.Role).SingleOrDefault();
+
+
                 if (string.IsNullOrEmpty(userId) || string.IsNullOrWhiteSpace(token))
                     return NotFound();
 
-                var result = await _accountServices.ConfirmEmailAsync(userId,token);
+                var result = await _accountServices.ConfirmEmailAsync(userId, token);
 
                 if(result.IsSuccess)
                 {
-                    return Redirect($"{_configuration["AppUrl"]}/ConfirmEmail.html");
+                    return Ok(result);
                 }
                 return BadRequest(result);
             }

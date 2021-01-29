@@ -44,9 +44,7 @@ namespace Library_Management_System.Web.Controllers
                         httpClient.DefaultRequestHeaders.Accept.Clear();
                         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                        // var uri = string.Format(_apiRequestUri.GetStudentById, "2", "name");
-                        //api/Student/2/name
-                        var uri = _apiRequestUri.BaseUri + _apiRequestUri.GetBooks;
+                        var uri = string.Format(_apiRequestUri.GetBooks);
 
                         HttpResponseMessage res = await httpClient.GetAsync(uri);
 

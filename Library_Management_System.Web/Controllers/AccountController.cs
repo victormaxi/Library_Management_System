@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Library_Management_System.Core.ViewModels;
 using Library_Management_System.Web.Helper;
 using Microsoft.AspNetCore.Http;
@@ -96,7 +97,7 @@ namespace Library_Management_System.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login ([FromBody] LoginVM loginVm)
+        public async Task<IActionResult> Login (LoginVM loginVm)
         {
             try
             {
@@ -130,7 +131,8 @@ namespace Library_Management_System.Web.Controllers
                     if (response.IsSuccessStatusCode)
                     {
 
-                        return RedirectToAction("Book", "GetBooks");
+                        return Ok("Login Successful");
+                       // return RedirectToAction("Book", "GetBooks");
                         //return RedirectToAction("GetStudentById", new { id = student.ID });
                     }
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
@@ -158,22 +160,20 @@ namespace Library_Management_System.Web.Controllers
                 using (var httpClient = new HttpClient())
                 {
                     httpClient.BaseAddress = new Uri(_apiRequestUri.BaseUri);
-                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Accept.Clear(); 
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                     
 
-
-
-
-                    var uri = string.Format(_apiRequestUri.ConfirmEmail, userId, token );
-                   
-                    HttpResponseMessage response = (HttpResponseMessage)null;
-
-                    response = await  httpClient.GetAsync(uri);
+                     var uri = string.Format(_apiRequestUri.ConfirmEmail, userId, token);
+                    
+                     
+                    HttpResponseMessage response = await httpClient.GetAsync(uri);
+                     
                     if (response.IsSuccessStatusCode)
                     {
 
                         return RedirectToAction("EmailConfirmed");
-                        //return RedirectToAction("GetStudentById", new { id = student.ID });
+               
                     }
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                     {
