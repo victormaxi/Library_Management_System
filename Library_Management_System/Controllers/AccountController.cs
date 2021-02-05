@@ -36,7 +36,7 @@ namespace Library_Management_System.Controllers
                 if(ModelState.IsValid)
                 {
                     var result = await _accountServices.LoginUser(loginVm);
-                    if(result.IsSuccess)
+                    if (result != null)
                     {
                         return Ok(result);
                     }

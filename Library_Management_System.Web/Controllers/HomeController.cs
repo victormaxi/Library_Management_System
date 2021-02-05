@@ -22,6 +22,10 @@ namespace Library_Management_System.Web.Controllers
         {
             return View();
         }
+        public IActionResult UnAuthorized()
+        {
+            return View();
+        }
 
         public IActionResult Privacy()
         {

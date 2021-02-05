@@ -4,10 +4,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
+using Library_Management_System.Core.Utility;
 using Library_Management_System.Core.ViewModels;
 using Library_Management_System.Web.Helper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -130,10 +134,96 @@ namespace Library_Management_System.Web.Controllers
                     response = await httpClient.PostAsJsonAsync(uri, loginVm);
                     if (response.IsSuccessStatusCode)
                     {
+                        ViewBag.Status = 1;
+                        #region cookie Implementation
+                        string stringJWT = response.Content.ReadAsStringAsync().Result;
+                        // JWT jwt = JsonConvert.DeserializeObject<JWT>(stringJWT);
+                        var authResponse = JsonConvert.DeserializeObject<AuthResponse>(stringJWT);
 
-                        return Ok("Login Successful");
-                       // return RedirectToAction("Book", "GetBooks");
+                        var resp = new AuthResponse
+                        {
+                            userId = authResponse.userId,
+                           // userCode = authResponse.userCode.ToString(),
+                            Roles = authResponse.Roles,
+                            username = authResponse.Email,
+                            Email = authResponse.Email,
+                            token = authResponse.token,
+                            expiryDate = authResponse.expiryDate
+                        };
+
+                     
+                        var claims = new List<Claim>
+                       // var claims = new []
+                        {
+                            
+                                new Claim("Id", authResponse.userId.ToString()),
+                                //new Claim("Code", authResponse.userCode),
+                                new Claim(ClaimTypes.Name, loginVm.UserName),
+                                new Claim("FullName", "firstname lastname"),
+                                new Claim(ClaimTypes.Role, "Admin"),
+                                new Claim("JWT", authResponse.token),
+                                new Claim("Email", authResponse.Email)
+
+                        };
+
+                        string roleVal;
+                        foreach (var role in authResponse.Roles)
+                        {
+
+                            if (role == 0)
+                            {
+                                roleVal = "Admin";
+                            }
+                          
+                            else
+                            {
+                                roleVal = "Student";
+                            }
+
+                            claims.Add(new Claim(ClaimTypes.Role, roleVal));
+                        }
+
+                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authProperties = new AuthenticationProperties
+                        {
+                            AllowRefresh = true,
+                            // Refreshing the authentication session should be allowed.
+
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
+                            // The time at which the authentication ticket expires. A 
+                            // value set here overrides the ExpireTimeSpan option of 
+                            // CookieAuthenticationOptions set with AddCookie.
+
+                            IsPersistent = true,
+                            // Whether the authentication session is persisted across 
+                            // multiple requests. When used with cookies, controls
+                            // whether the cookie's lifetime is absolute (matching the
+                            // lifetime of the authentication ticket) or session-based.
+
+                            //IssuedUtc = <DateTimeOffset>,
+                            // The time at which the authentication ticket was issued.
+
+                            //RedirectUri = <string>
+                            // The full path or absolute URI to be used as an http 
+                            // redirect response value.
+                        };
+
+                        ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
+                        //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                        //HttpContext.Session.SetString("token", jwt.Token);
+
+                        // ViewBag.Message = "User logged in successfully!";
+                        if(claimsPrincipal.IsInRole("Admin"))
+                        {
+                            return RedirectToAction("GetBooks", "Book");
+                        }
+                        
+                        // return RedirectToAction("Book", "GetBooks");
                         //return RedirectToAction("GetStudentById", new { id = student.ID });
+#endregion
                     }
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                     {
@@ -147,6 +237,13 @@ namespace Library_Management_System.Web.Controllers
                 throw new Exception(ex.Message);
             }
             return View();
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Remove("token");
+            ViewBag.Message = "User logged out successfully!";
+            return View("Index");
         }
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {

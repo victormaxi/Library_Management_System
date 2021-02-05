@@ -76,7 +76,7 @@ namespace Library_Management_System
                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
            }).
-            AddJwtBearer(options =>
+            AddJwtBearer(("Bearer"),options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -92,6 +92,7 @@ namespace Library_Management_System
            // services.Configure<EmailConfiguration>(Configuration.GetSection("SMPT"));
             services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -107,7 +108,7 @@ namespace Library_Management_System
             app.UseStaticFiles();
 
             app.UseRouting();
-
+           
             app.UseAuthentication();
             app.UseAuthorization();
 

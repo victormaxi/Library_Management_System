@@ -1,0 +1,21 @@
+﻿
+@{
+    ViewData["Title"] = "UnAuthorized";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="content">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-8">
+                <div class="error-template text-center">
+                    <i class="fa fa-exclamation-triangle fa-5x text-danger animated zoomIn mb50"></i>
+                    <h3 class="main-title"><span>Oops! UnAuthorized</span></h3>
+                    <div class="main-title-description">You're not unauthorized to view this page </div>
+                    <div class="error-actions"> <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg ml-2 mr-2 mb-3">Take Me Home </a> <a href="contact.html" class="btn btn-light btn-lg ml-2 mr-2 mb-3">Contact Support </a> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

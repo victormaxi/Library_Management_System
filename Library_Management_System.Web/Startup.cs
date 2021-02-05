@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Library_Management_System.Web.Helper;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +27,19 @@ namespace Library_Management_System.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+              .AddCookie(c =>
+              {
+                  c.LoginPath = "/account/login";
+                  c.LogoutPath = "/account/logout";
+              });
             services.AddControllersWithViews();
             var appsettings = Configuration.GetSection("ApiRequestUri");
             services.Configure<ApiRequestUri>(appsettings);
@@ -35,6 +49,8 @@ namespace Library_Management_System.Web
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(10);
             });
+            services.AddMemoryCache();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,8 +70,9 @@ namespace Library_Management_System.Web
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
+            app.UseCookiePolicy();
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
             //app.UseEndpoints(endpoints =>
             //{

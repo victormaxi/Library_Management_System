@@ -2,6 +2,7 @@
 using Library_Management_System.Core.Helper;
 using Library_Management_System.Core.Interfaces;
 using Library_Management_System.Core.Models;
+using Library_Management_System.Core.Utility;
 using Library_Management_System.Core.ViewModels;
 using Library_Management_System.Data;
 using Microsoft.AspNetCore.Identity;
@@ -139,7 +140,7 @@ namespace Library_Management_System.Domain.Services
                 return new UserManagerResponse()
                 {
                     Message = "User doesn't exist",
-                    IsSuccess = true
+                   
                 };
             }
             catch(Exception ex)
@@ -147,7 +148,7 @@ namespace Library_Management_System.Domain.Services
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<UserManagerResponse> LoginUser(LoginVM loginVM)
+        public async Task<object> LoginUser(LoginVM loginVM)
         {
             try
             {
@@ -186,13 +187,32 @@ namespace Library_Management_System.Domain.Services
 
                 string tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                return new UserManagerResponse
+                var roles = new List<Roles>()
                 {
-                    Message = tokenAsString,
-                    IsSuccess = true,
-                    ExpireDate = token.ValidTo
+                    user.Role
                 };
+                var resp = new AuthResponse
+                {
+                    userId = user.Id,
+                    
+                    Roles = roles,
+                    username = user.UserName,
+                    Email = user.Email,
+                    token = tokenAsString,
+                    //expiryDate = user. .expiryDate
+                };
+
+                return resp;
+                //return new UserManagerResponse
+                //{
+                //    Message = tokenAsString,
+                //    IsSuccess = true,
+                //    ExpireDate = token.ValidTo
+                //};
+
+
             }
+           
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);

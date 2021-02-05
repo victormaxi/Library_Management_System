@@ -16,5 +16,6 @@ namespace Library_Management_System.Web.Helper
 
         //Book Uri
         public string GetBooks { get; set; }
+        public string AddBook { get; set; }
     }
 }
