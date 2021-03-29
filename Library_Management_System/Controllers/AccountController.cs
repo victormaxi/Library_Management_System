@@ -14,7 +14,7 @@ namespace Library_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : BaseController
     {
         private readonly IAccountServices _accountServices;
         private IConfiguration _configuration;
@@ -50,6 +50,8 @@ namespace Library_Management_System.Controllers
                 throw new Exception(ex.Message);
             }
         }
+
+
 
         [HttpPost]
         [Route("registerUserAsync")]
@@ -124,5 +126,6 @@ namespace Library_Management_System.Controllers
                 throw new Exception(ex.Message);
             }
         }
+       
     }
 }

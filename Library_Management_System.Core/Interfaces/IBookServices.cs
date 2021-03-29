@@ -9,8 +9,10 @@ namespace Library_Management_System.Core.Interfaces
 {
     public interface IBookServices
     {
-        Task AddBook(BookVM book);
-        Task<object> GetBooks();
+        Task<object> AddBook(BookVM book);
+        Task<List<BookVM>> GetBooks();
         Task<object> GetBookById(int BookId);
+        Task<object> SelectCourse(SelectedBook book);
+        Task<object> AddUserBook(SelectedBookVM book);
     }
 }

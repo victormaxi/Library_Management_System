@@ -1,0 +1,56 @@
+﻿@model Library_Management_System.Core.Models.SelectedBook
+
+@{
+    ViewData["Title"] = "SelectCourse";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>SelectCourse</h1>
+
+<h4>SelectedBook</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="SelectCourse">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="id" class="control-label"></label>
+                <input asp-for="id" class="form-control" />
+                <span asp-validation-for="id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="userId" class="control-label"></label>
+                <input asp-for="userId" class="form-control" />
+                <span asp-validation-for="userId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="bookId" class="control-label"></label>
+                <input asp-for="bookId" class="form-control" />
+                <span asp-validation-for="bookId" class="text-danger"></span>
+            </div>
+            @*<select asp-items="Model." asp-for="PropertyMode" class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v3 g-brd-primary--hover rounded-0 g-py-6 g-px-15" type="text" required
+                    data-placeholder="Gender"
+                    data-open-icon="fa fa-angle-down"
+                    data-close-icon="fa fa-angle-up">
+                <option value="" selected="selected">
+                    Select Property Mode
+                </option>
+            </select>*@
+        <div>
+            Book List @Html.DropDownList("BookList", "")
+
+        </div>
+            @*<select id="Select1" class="form-group" asp-items="@(new SelectList(course.CourseTitle,"CourseId","CourseCode"))">
+             <option value="" selected disabled>----Select course----</option*@>
+        @*</select>*@
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

@@ -6,11 +6,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Library_Management_System.Core.Helper;
+using Library_Management_System.Core.Models;
 using Library_Management_System.Core.ViewModels;
 using Library_Management_System.Web.Helper;
+using Library_Management_System.Web.Services.Intrerface;
+using Library_Management_System.Web.Services.Manager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -20,17 +26,19 @@ namespace Library_Management_System.Web.Controllers
     {
         private readonly ApiRequestUri _apiRequestUri;
         private readonly IHttpContextAccessor _HttpContext;
+        private readonly IResources _resourses;
 
 
 
-        public BookController(IOptionsSnapshot<ApiRequestUri> options, IHttpContextAccessor _httpContext) : base(_httpContext.HttpContext)
+        public BookController(IOptionsSnapshot<ApiRequestUri> options, IHttpContextAccessor _httpContext, IResources resources) : base(_httpContext.HttpContext)
         {
             _apiRequestUri = options.Value;
             _HttpContext = _httpContext;
+            _resourses = resources;
 
         }
-        [Authorize]
-        public IActionResult Index()
+       // [Authorize(Roles = Role.Admin)]
+        public ActionResult Index()
         {
             return View();
         }
@@ -38,6 +46,8 @@ namespace Library_Management_System.Web.Controllers
         {
             try
             {
+                
+                
                 BookVM bookVM = new BookVM();
                 if (this.ModelState.IsValid)
                     using (var httpClient = new HttpClient())
@@ -49,7 +59,7 @@ namespace Library_Management_System.Web.Controllers
                         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
                             HttpContext.Session.GetString("token"));
 
-                        var uri = string.Format(_apiRequestUri.GetBooks);
+                        var uri = _apiRequestUri.BaseUri + _apiRequestUri.GetBooks;
 
                         HttpResponseMessage res = await httpClient.GetAsync(uri);
 
@@ -57,7 +67,7 @@ namespace Library_Management_System.Web.Controllers
                         {
                             var apiTask = res.Content.ReadAsStringAsync();
                             var responseString = apiTask.Result;
-                            var model = JsonConvert.DeserializeObject<BookVMList>(responseString);
+                            var model = JsonConvert.DeserializeObject<List<BookVMList>>(responseString);
                             if (res.StatusCode == HttpStatusCode.Unauthorized)
                             {
                                 ViewBag.Message = "Unauthorized!";
@@ -100,13 +110,14 @@ namespace Library_Management_System.Web.Controllers
                 {
                     return View(bookVM);
                 }
+               // var roles = GetRoles();
 
                 using (var httpClient = new HttpClient())
                 {
                     httpClient.BaseAddress = new Uri(_apiRequestUri.BaseUri);
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+                   
                     var book = new AddBookVM()
                     {
                         BookCode = bookVM.BookCode, 
@@ -140,50 +151,91 @@ namespace Library_Management_System.Web.Controllers
             return View();
         }
 
+        [HttpGet]
+        //[Route("SelectCourse")]
+        public async Task<IActionResult> SelectCourse()
+        
+        {
+            try
+            {           
+                //ISession session = HttpContextAccessor.HttpContext.Session;
 
-//        string baseUrl = "http://localhost:49387";
-//        HttpClient client = new HttpClient();
-//        client.BaseAddress = new Uri(baseUrl);
-//        var contentType = new MediaTypeWithQualityHeaderValue
-//    ("application/json");
-//        client.DefaultRequestHeaders.Accept.Add(contentType);
+                //session.SetString("Id",)
+                var allBooks = await _resourses.GetBooks();
 
-//    client.DefaultRequestHeaders.Authorization =
-//new AuthenticationHeaderValue("Bearer",
-//HttpContext.Session.GetString("token"));
+                ViewBag.BookList = allBooks;
 
-//    HttpResponseMessage response = client.GetAsync
-//("/api/employee").Result;
-//        string stringData = response.Content.
-//    ReadAsStringAsync().Result;
-//        List<Employee> data = JsonConvert.DeserializeObject
-//    <List<Employee>>(stringData);
+                var userId = GetUserId();
 
-//    if (response.StatusCode == HttpStatusCode.Unauthorized)
-//    {
-//        ViewBag.Message = "Unauthorized!";
-//    }
-//    else
-//    {
-//        string strTable = "<table border='1' cellpadding='10'>";
-//        foreach (Employee emp in data)
-//        {
-//            strTable += "<tr>";
-//            strTable += "<td>";
-//            strTable += emp.EmployeeID;
-//            strTable += "</td>";
-//            strTable += "<td>";
-//            strTable += emp.FirstName;
-//            strTable += "</td>";
-//            strTable += "<td>";
-//            strTable += emp.LastName;
-//            strTable += "</td>";
-//            strTable += "</tr>";
+                HttpContext.Session.SetString("Id", userId);
+             
+                return View();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
-//        }
-//strTable += "</table>";
+        [HttpPost]
+       // [Route("SelectCourse")]
+        public async Task<IActionResult> SelectCourse(int bookId)
+        {
+            try
+            {
 
-//        ViewBag.Message = strTable;
+                var userId = GetUserId();
+
+                var allBooks = await _resourses.GetBooks();
+
+                ViewBag.BookList = allBooks;
+
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(_apiRequestUri.BaseUri);
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var newBook = new AddUserBookVM()
+                    {
+                        BookId = bookId,
+                        ApplicationUserId = userId
+
+                    };
+                    var uri = string.Format(_apiRequestUri.AddUserBooks, userId, bookId);
+
+                   // StringContent content = new StringContent(JsonConvert.SerializeObject(newBook));
+
+                    //HttpResponseMessage response = await httpClient.PostAsync(uri, content);
+                    HttpResponseMessage response = (HttpResponseMessage)null;
+
+                    response = await httpClient.PostAsJsonAsync(uri,newBook);
+                    if (response.IsSuccessStatusCode)
+                    {
+
+                        return RedirectToAction("GetBooksForUser", "UserBooksWeb",userId);
+                        //return RedirectToAction("GetStudentById", new { id = student.ID });
+                    }
+                    if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    {
+                        ModelState.AddModelError("", await response.Content.ReadAsStringAsync());
+                    }
+                }
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
     }
 }
 

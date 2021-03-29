@@ -1,0 +1,72 @@
+﻿@model Library_Management_System.Core.ViewModels.AddUserBookVM
+
+
+@{
+    ViewData["Title"] = "SelectCourse";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>SelectCourse</h1>
+
+<h4>SelectedBook</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="SelectCourse">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div>
+                @*Book List @Html.DropDownList("newBook", "")*@
+
+
+                @*@Html.DropDownList("MyBooks", (IEnumerable
+        <SelectListItem>)ViewData["listOfBooks"])
+                                 <select asp-for="BookId" asp-items='new SelectList(ViewBag.listOfBooks,"BookId","BookTitle")'>
+                     <option value="">--Select--</option>
+                 </select>*@
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="alert-danger" asp-validation-summary="ModelOnly"></div>
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+                            <label asp-for="BookId" class="control-label"></label>
+                            <select asp-for="BookId" class="form-control" asp-items='@(new SelectList(@ViewBag.BookList,"BookId","BookTitle"))'></select>
+                            <option value="">Select your Book</option>
+                        </div>
+                    </div>
+                </div>
+
+              
+
+
+                @*<div class="form-group">
+            @Html.LabelFor(model => model.BookId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.BookId, (IEnumerable<SelectListItem>)ViewBag.hospitalname, "Select Hospital", new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.BookId, "", new { @class = "text-danger" })
+
+            </div>
+        </div>*@
+
+                @*@foreach (var items in Model)
+        {
+            <select asp-for="@items.BookId" asp-items='new SelectList(books,"BookId","Name")'>
+                <option value="">----Select Books----</option>
+            </select>
+        }*@
+
+
+
+                @*<select asp-for="" class="btn btn-primary dropdown-toggle" asp-items='new SelectList(books,"BookId")'>----</select>*@
+
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

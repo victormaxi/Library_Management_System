@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Library_Management_System.Core.Interfaces;
 using Library_Management_System.Core.Models;
-using Library_Management_System.Data;
+
 using Library_Management_System.Domain.Services;
+using Library_Management_System_Data;
+using Library_Management_System_Domain.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -67,6 +69,7 @@ namespace Library_Management_System
                .AddDefaultTokenProviders();
             services.AddScoped<IBookServices, BookServicesManager>();
             services.AddScoped<IAccountServices, AccountServicesManager>();
+            services.AddScoped<IUserBooksServices, UserBookManager>();
             services.AddTransient<IMailServices, MailServicesManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>

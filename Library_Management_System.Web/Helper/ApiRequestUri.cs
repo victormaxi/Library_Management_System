@@ -17,5 +17,11 @@ namespace Library_Management_System.Web.Helper
         //Book Uri
         public string GetBooks { get; set; }
         public string AddBook { get; set; }
+        public string GetUserRoles { get; set; }
+
+
+        public string SelectCourse { get; set; }
+        public string AddUserBooks { get; set; }
+        public string GetBooksForUser { get; set; }
     }
 }

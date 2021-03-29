@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Library_Management_System.Core\Library_Management_System.Core.csproj" />
-    <ProjectReference Include="..\Library_Management_System.Data\Library_Management_System.Data.csproj" />
+    <ProjectReference Include="..\Library_Management_System_Data\Library_Management_System_Data.csproj" />
   </ItemGroup>
 
 </Project>

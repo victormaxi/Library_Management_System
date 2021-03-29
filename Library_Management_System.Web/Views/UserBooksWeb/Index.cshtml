@@ -1,0 +1,15 @@
+﻿@model Library_Management_System.Core.ViewModels.BookVM
+
+@{
+
+}
+
+@*@Html.DropDownList("BookLists","")*@
+
+@*<select asp-for="BookId" asp-items='new SelectList(books,"BookId","Name")'>*@
+    <div>
+        <select asp-for="@Model.BookTitle" asp-items="@(new SelectList(ViewBag.message,"BookId","Name"))">
+            <option value="">----Select Books----</option>
+        </select>
+    </div>
+    

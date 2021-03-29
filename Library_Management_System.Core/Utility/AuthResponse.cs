@@ -12,7 +12,7 @@ namespace Library_Management_System.Core.Utility
         public string username { get; set; }
         public string Email { get; set; }
         public string token { get; set; }
-        public ICollection<Roles> Roles { get; set; }
+        public string Role { get; set; }
         public DateTime expiryDate { get; set; }
 
     }

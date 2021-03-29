@@ -10,8 +10,10 @@ using System.Web;
 using Library_Management_System.Core.Utility;
 using Library_Management_System.Core.ViewModels;
 using Library_Management_System.Web.Helper;
+using Library_Management_System.Web.Services.Intrerface;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -23,17 +25,23 @@ namespace Library_Management_System.Web.Controllers
     {
         private readonly ApiRequestUri _apiRequestUri;
         private readonly IHttpContextAccessor _HttpContext;
+        private readonly IResources _resource;
+        private readonly IHostingEnvironment _appEnvironment;
 
+       
 
-
-        public AccountController(IOptionsSnapshot<ApiRequestUri> options, IHttpContextAccessor _httpContext) : base(_httpContext.HttpContext)
+        public AccountController(IOptionsSnapshot<ApiRequestUri> options, IHttpContextAccessor _httpContext, IResources resource, IHostingEnvironment appEnvironment) : base(_httpContext.HttpContext)
         {
+            _resource = resource;
+            _appEnvironment = appEnvironment;
             _apiRequestUri = options.Value;
             _HttpContext = _httpContext;
 
         }
         public IActionResult Index()
         {
+            
+
             return View();
         }
 
@@ -101,6 +109,7 @@ namespace Library_Management_System.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login (LoginVM loginVm)
         {
             try
@@ -144,7 +153,7 @@ namespace Library_Management_System.Web.Controllers
                         {
                             userId = authResponse.userId,
                            // userCode = authResponse.userCode.ToString(),
-                            Roles = authResponse.Roles,
+                            Role = authResponse.Role,
                             username = authResponse.Email,
                             Email = authResponse.Email,
                             token = authResponse.token,
@@ -160,28 +169,40 @@ namespace Library_Management_System.Web.Controllers
                                 //new Claim("Code", authResponse.userCode),
                                 new Claim(ClaimTypes.Name, loginVm.UserName),
                                 new Claim("FullName", "firstname lastname"),
-                                new Claim(ClaimTypes.Role, "Admin"),
+                                new Claim(ClaimTypes.Role, authResponse.Role),
                                 new Claim("JWT", authResponse.token),
                                 new Claim("Email", authResponse.Email)
 
                         };
 
                         string roleVal;
-                        foreach (var role in authResponse.Roles)
+
+                        //foreach (var role in authResponse.Roles)
+                        //{
+
+                        //    if (role == 0)
+                        //    {
+                        //        roleVal = "Admin";
+                        //    }
+
+                        //    else
+                        //    {
+                        //        roleVal = "Student";
+                        //    }
+
+                        //    claims.Add(new Claim(ClaimTypes.Role, roleVal));
+                        //}
+
+                        var role = authResponse.Role;
+                        if ( role == "Admin")
                         {
-
-                            if (role == 0)
-                            {
-                                roleVal = "Admin";
-                            }
-                          
-                            else
-                            {
-                                roleVal = "Student";
-                            }
-
-                            claims.Add(new Claim(ClaimTypes.Role, roleVal));
+                            roleVal = "Admin";
                         }
+                        else
+                        {
+                            roleVal = "Student";
+                        }
+                        claims.Add(new Claim(ClaimTypes.Role, roleVal));
 
                         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                         var authProperties = new AuthenticationProperties
@@ -218,7 +239,11 @@ namespace Library_Management_System.Web.Controllers
                         // ViewBag.Message = "User logged in successfully!";
                         if(claimsPrincipal.IsInRole("Admin"))
                         {
-                            return RedirectToAction("GetBooks", "Book");
+                            return RedirectToAction("Index", "AdminDashBoard", new { area = "Admin"});
+                        }
+                        else if(claimsPrincipal.IsInRole("Student"))
+                        {
+                            return RedirectToAction("Index", "StudentDashBoard", new { area = "Student" });
                         }
                         
                         // return RedirectToAction("Book", "GetBooks");
@@ -239,11 +264,14 @@ namespace Library_Management_System.Web.Controllers
             return View();
         }
 
-        public IActionResult Logout()
+        [HttpPost]
+        public async Task<IActionResult> Logout()
         {
             HttpContext.Session.Remove("token");
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             ViewBag.Message = "User logged out successfully!";
-            return View("Index");
+            return View("Login");
         }
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {

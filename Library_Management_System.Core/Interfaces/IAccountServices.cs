@@ -15,5 +15,6 @@ namespace Library_Management_System.Core.Interfaces
         Task<UserManagerResponse> ConfirmEmailAsync(string userId, string token);
         Task<UserManagerResponse> ForgotPasswordAsync(string email);
         Task SendConfirmRegistrationMail(string userEmail, string WebUrl);
+      
     }
 }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Library_Management_System.Data;
+using Library_Management_System_Data;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +37,7 @@ namespace Library_Management_System
                 {
                     var context = services.GetRequiredService<ApplicationDBContext>();
                     context.Database.Migrate();
-                    SeedData.Initialize(services);
+                    //SeedData.Initialize(services);
                 }
                 catch (Exception ex)
                 {

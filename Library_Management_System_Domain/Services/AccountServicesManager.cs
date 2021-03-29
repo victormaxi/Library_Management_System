@@ -4,9 +4,10 @@ using Library_Management_System.Core.Interfaces;
 using Library_Management_System.Core.Models;
 using Library_Management_System.Core.Utility;
 using Library_Management_System.Core.ViewModels;
-using Library_Management_System.Data;
+using Library_Management_System_Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -152,6 +153,8 @@ namespace Library_Management_System.Domain.Services
         {
             try
             {
+               // var user = await context.Users.Include(x => x.Role).
+                 //   FirstOrDefaultAsync(x => x.UserName == loginVM.UserName);
                 var user = await userManager.FindByNameAsync(loginVM.UserName);
                 if(user == null)
                 {
@@ -173,7 +176,9 @@ namespace Library_Management_System.Domain.Services
                 var claims = new[]
                 {
                     new Claim ("UserName",loginVM.UserName),
-                    new Claim(ClaimTypes.NameIdentifier,user.Id)
+                    new Claim(ClaimTypes.NameIdentifier,user.Id),
+                    new Claim(ClaimTypes.Role,user.Role)
+                   
                 };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AuthSettings:key"]));
@@ -187,15 +192,14 @@ namespace Library_Management_System.Domain.Services
 
                 string tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                var roles = new List<Roles>()
-                {
-                    user.Role
-                };
+               
+
                 var resp = new AuthResponse
                 {
                     userId = user.Id,
                     
-                    Roles = roles,
+                    //Roles = roles,
+                    Role = user.Role,
                     username = user.UserName,
                     Email = user.Email,
                     token = tokenAsString,
@@ -247,7 +251,7 @@ namespace Library_Management_System.Domain.Services
 
                         // first registered account is an admin
                         // Role = isFirstAccount ? Roles.Admin : Roles.Student
-                        Role = Roles.Admin
+                        Role = Role.Admin
                     };
 
                     var result1 = await userManager.CreateAsync(user, userVM.Password);
@@ -262,6 +266,7 @@ namespace Library_Management_System.Domain.Services
 
                         _mailServices.SendEmail2(user.Email, $"<a href='{callbackUrl}'> Click here</a>");
 
+                        
                         return new UserManagerResponse
                         {
                             Message = "User created successfully!!",
@@ -276,7 +281,7 @@ namespace Library_Management_System.Domain.Services
                         Errors = result1.Errors.Select(e => e.Description)
                     };
                 }
-
+                
                 else
                 {
                     var user2 = new ApplicationUser()
@@ -287,7 +292,9 @@ namespace Library_Management_System.Domain.Services
 
                         // first registered account is an admin
                         // Role = isFirstAccount ? Roles.Admin : Roles.Student
-                        Role = Roles.Student
+                        Role = Role.Student,
+                        
+                        
                     };
                     var result2 = await userManager.CreateAsync(user2, userVM.Password);
                     if (result2.Succeeded)
@@ -353,6 +360,7 @@ namespace Library_Management_System.Domain.Services
             }
         }
 
+     
         public Task SendConfirmRegistrationMail(string userEmail, string WebUrl)
         {
             throw new NotImplementedException();

@@ -1,0 +1,44 @@
+﻿@model Library_Management_System.Core.ViewModels.AddBookVM
+
+@{
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>AddBook</title>
+</head>
+<body>
+
+<h4>BookVM</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="AdminDashBoard" asp-action="AddBook" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="BookTitle" class="control-label"></label>
+                <input asp-for="BookTitle" class="form-control" />
+                <span asp-validation-for="BookTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BookCode" class="control-label"></label>
+                <input asp-for="BookCode" class="form-control" />
+                <span asp-validation-for="BookCode" class="text-danger"></span>
+             </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+</body>
+</html>

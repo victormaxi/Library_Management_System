@@ -18,5 +18,6 @@ namespace Library_Management_System.Data
         public DbSet<Borrowed_Book> Borrowed_Books { get; set; }
         public DbSet<Returned_Book> Returned_Books { get; set; }
         public DbSet<BookAuthor> BookAuthors { get; set; }
+       // public DbSet<Role> Roles { get; set; }
     }
 }

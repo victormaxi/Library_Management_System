@@ -8,5 +8,7 @@ namespace Library_Management_System.Core.ViewModels
     {
         public int BookId { get; set; }
         public string BookTitle { get; set; }
+        public string BookCode { get; set; }
+       // public virtual IEnumerable<SelectedBookVM> SelectedBookVMs { get; set; }
     }
 }
